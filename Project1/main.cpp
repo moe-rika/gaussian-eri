@@ -13,6 +13,7 @@ using std::cout;
 using std::endl;
 using std::array;
 
+const double PI = 3.141592653589793238463;
 
 struct Point3D
 {
@@ -119,7 +120,7 @@ public:
 		neg_rho_div_xi = -p.rho / p.xi;
 		coef = pow(3.141592657 / (p.xi + p.eta), 1.5) * p.Sab * p.Scd * pow(3.141592657 / p.rho, 1.5);
 	}
-	
+
 
 
 
@@ -128,7 +129,17 @@ public:
 	void HRR3();
 	void VRR();
 
-
+	double boys_function(int n, double T)
+	{
+		if (n == 0)
+		{
+			return sqrt(PI / (4 * T)) * erf(sqrt(T));
+		}
+		else
+		{
+			return 1. / (2 * T) * ((2 * n - 1) * boys_function(n - 1, T) - exp(-T));
+		}
+	}
 
 	map<vector<signed char>, double> m;
 	map<vector<signed char>, double> m1;
@@ -147,21 +158,24 @@ int main()
 	BasisSet px4{ {0,0,0},1,0.45,{1,0,0} };
 	auto m = BasisSetFourToulpeRecursionInterace(BasisSetFourToulpe(px1, px2, px3, px4));
 
-	m.HRR1();
-	m.HRR2();
-	m.HRR3();
-	m.VRR();
-	for (auto& a : m.m1)
-	{
-		for (auto& b : a.first)
-		{
-			cout << (int)b << " ";
-		}
-		cout << " ";
-		cout << a.second << endl;
-	}
-	cout << m.coef << endl;
-	cout << m.coef * m.m1.begin()->second << endl;
+	//m.HRR1();
+	//m.HRR2();
+	//m.HRR3();
+	//m.VRR();
+	//for (auto& a : m.m1)
+	//{
+	//	for (auto& b : a.first)
+	//	{
+	//		cout << (int)b << " ";
+	//	}
+	//	cout << " ";
+	//	cout << a.second << endl;
+	//}
+	//cout << m.coef << endl;
+	cout << m.boys_function(2, 1.24) << endl;
+	cout << m.boys_function(5, 3.01) << endl;
+	cout << m.boys_function(10, 0.27) << endl;
+
 
 	//f[c_, a_, ax_, ay_, az_, x0_, y0_, z0_, x_, y_, z_] : =
 	//	N[c(x - x0) ^ ax(y - y0) ^ ay(z - z0) ^
