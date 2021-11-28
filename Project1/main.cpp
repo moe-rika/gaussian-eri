@@ -78,7 +78,8 @@ class BasisSetFourToulpe
 {
 public:
 	BasisSetFourToulpe(const BasisSet& a, const BasisSet& b, const BasisSet& c, const BasisSet& d) :
-		v{ a.a[0],a.a[1],a.a[2],b.a[0],b.a[1],b.a[2],c.a[0],c.a[1],c.a[2],d.a[0],d.a[1],d.a[2] }
+		v{ a.a[0],a.a[1],a.a[2],b.a[0],b.a[1],b.a[2],c.a[0],c.a[1],c.a[2],d.a[0],d.a[1],d.a[2] },
+		c{ a.coeficient,b.coeficient,c.coeficient,d.coeficient }
 	{
 		xi = a.alpha + b.alpha;
 		eta = c.alpha + d.alpha;
@@ -98,6 +99,7 @@ public:
 		Scd = exp(-gamma * delta / eta * (C - D).norm_sq());
 	}
 	vector<signed char> v;
+	vector<double> c;
 	double alpha, beta, gamma, delta;
 	double xi, eta, rho, T, Sab, Scd;
 	Point3D A, B, C, D, P, Q;
@@ -118,7 +120,7 @@ public:
 		P_Q = -p.rho / p.xi * (p.P - p.Q);
 		two_xi = 2 * p.xi;
 		neg_rho_div_xi = -p.rho / p.xi;
-		coef = pow(3.141592657 / (p.xi + p.eta), 1.5) * p.Sab * p.Scd * pow(3.141592657 / p.rho, 1.5);
+		coef = pow(3.141592657 / (p.xi + p.eta), 1.5) * p.Sab * p.Scd ;
 	}
 
 
@@ -153,28 +155,38 @@ public:
 int main()
 {
 	BasisSet px1{ {1,0,0},1,0.12,{0,0,0} };
-	BasisSet px2{ {1,0,0},1,0.23,{0,0,0} };
-	BasisSet px3{ {0,2,0},1,0.34,{1,0,0} };
-	BasisSet px4{ {0,0,0},1,0.45,{1,0,0} };
-	auto m = BasisSetFourToulpeRecursionInterace(BasisSetFourToulpe(px1, px2, px3, px4));
+	BasisSet px2{ {1,0,0},1,0.23,{1,0,0} };
+	BasisSet px3{ {0,2,0},1,0.34,{0,0,0} };
+	BasisSet px4{ {0,2,0},1,0.45,{1,0,0} };
+	auto m0 = (BasisSetFourToulpe(px1, px2, px3, px4));
+	auto m = BasisSetFourToulpeRecursionInterace(m0);
+	m.HRR1();
+	m.HRR2();
+	m.HRR3();
+	m.VRR();
+	for (auto& a : m.m1)
+	{
+		for (auto& b : a.first)
+		{
+			cout << (int)b << " ";
+		}
+		cout << " ";
+		cout << a.second << endl;
+	}
+	double coeff;
+	coeff = m.coef * m0.c[0] * m0.c[1] * m0.c[2] * m0.c[3];
 
-	//m.HRR1();
-	//m.HRR2();
-	//m.HRR3();
-	//m.VRR();
-	//for (auto& a : m.m1)
-	//{
-	//	for (auto& b : a.first)
-	//	{
-	//		cout << (int)b << " ";
-	//	}
-	//	cout << " ";
-	//	cout << a.second << endl;
-	//}
-	//cout << m.coef << endl;
-	cout << m.boys_function(2, 1.24) << endl;
-	cout << m.boys_function(5, 3.01) << endl;
-	cout << m.boys_function(10, 0.27) << endl;
+	cout << coeff * pow(3.141592657 / m0.rho, 1.5) * m.m1.begin()->second << endl;
+	double result = 0;
+	for (auto& a : m.m1)
+	{
+		result += a.second * m.boys_function((int)a.first[3], m0.T);
+		cout << (int)a.first[3] << " " << m.boys_function((int)a.first[3], m0.T) << endl;
+	}
+
+	result *= coeff * 2 * PI / m0.rho;
+
+	cout << result << endl;
 
 
 	//f[c_, a_, ax_, ay_, az_, x0_, y0_, z0_, x_, y_, z_] : =
@@ -431,17 +443,6 @@ void BasisSetFourToulpeRecursionInterace::VRR()//(a0|00) -> (00|00)
 						m1[temp] += second * (first[i] - 1) / two_xi * neg_rho_div_xi;
 					}
 				}
-				cout << endl;
-				for (auto& a : m1)
-				{
-					for (auto& b : a.first)
-					{
-						cout << (int)b << " ";
-					}
-					cout << " ";
-					cout << a.second << endl;
-				}
-				cout << endl;
 				iter = m1.begin();
 			}
 		}
