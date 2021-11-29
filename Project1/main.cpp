@@ -129,16 +129,22 @@ public:
 	void HRR3();
 	void VRR();
 
-	double boys_function(int n, double T)
+	vector<double> boys_function_list;
+
+	void boys_function_init(int n, double T)
 	{
-		if (n == 0)
+		boys_function_list.resize(n + 1);
+		boys_function_list[0] = sqrt(PI / (4 * T)) * erf(sqrt(T));
+		for (int i = 1; i < n + 1; i++)
 		{
-			return sqrt(PI / (4 * T)) * erf(sqrt(T));
+			boys_function_list[i] =
+				1. / (2 * T) * ((2 * i - 1) * boys_function_list[i - 1] - exp(-T));
 		}
-		else
-		{
-			return 1. / (2 * T) * ((2 * n - 1) * boys_function(n - 1, T) - exp(-T));
-		}
+	}
+
+	double boys_function(int n)
+	{
+		return boys_function_list[n];
 	}
 
 
@@ -172,12 +178,13 @@ int main()
 
 	cout << coeff * pow(3.141592657 / m0.rho, 1.5) * m.m1.begin()->second << endl;
 	double result = 0;
+	m.boys_function_init(m.m1.size(), m0.T);
 	for (auto& a : m.m1)
 	{
-		result += a.second * m.boys_function((int)a.first[3], m0.T);
-		cout << (int)a.first[3] << " " << m.boys_function((int)a.first[3], m0.T) << " "
+		result += a.second * m.boys_function((int)a.first[3]);
+		cout << (int)a.first[3] << " " << m.boys_function((int)a.first[3]) << " "
 			<< m0.T << " "
-			<< a.second * m.boys_function((int)a.first[3], m0.T)
+			<< a.second * m.boys_function((int)a.first[3])
 			<< endl;
 	}
 
