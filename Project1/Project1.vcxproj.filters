@@ -26,5 +26,8 @@
     <ClInclude Include="test_by_simpson.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Point3D.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
