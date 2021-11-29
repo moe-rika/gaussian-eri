@@ -181,7 +181,10 @@ int main()
 	for (auto& a : m.m1)
 	{
 		result += a.second * m.boys_function((int)a.first[3], m0.T);
-		cout << (int)a.first[3] << " " << m.boys_function((int)a.first[3], m0.T) << endl;
+		cout << (int)a.first[3] << " " << m.boys_function((int)a.first[3], m0.T) << " "
+			<< m0.T << " "
+			<< a.second * m.boys_function((int)a.first[3], m0.T)
+			<< endl;
 	}
 
 	result *= coeff * 2 * PI / m0.rho;
