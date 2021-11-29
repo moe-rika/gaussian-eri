@@ -191,20 +191,6 @@ int main()
 
 	cout << result << endl;
 
-
-	//f[c_, a_, ax_, ay_, az_, x0_, y0_, z0_, x_, y_, z_] : =
-	//	N[c(x - x0) ^ ax(y - y0) ^ ay(z - z0) ^
-	//	az E ^ (-a((x - x0) ^ 2 + (y - y0) ^ 2 + (z - z0) ^ 2))];
-	//f1[x_, y_, z_] : = f[1, 0.12, 1, 0, 0, 0, 0, 0, x, y, z];
-	//f2[x_, y_, z_] : = f[1, 0.23, 1, 0, 0, 0, 0, 0, x, y, z];
-	//f3[x_, y_, z_] : = f[1, 0.34, 0, 2, 0, 1, 0, 0, x, y, z];
-	//f4[x_, y_, z_] : = f[1, 0.45, 0, 0, 0, 1, 0, 0, x, y, z];
-	//NIntegrate[
-	//	f1[x1, y1, z1] * f2[x1, y1, z1] * f3[x2, y2, z2] *
-	//		f4[x2, y2, z2], { x1, -10, 10 }, { y1, -10, 10 }, { z1, -10,
-	//		10 }, { x2, -10, 10 }, { y2, -10, 10 }, { z2, -10, 10 }, MinRecursion -> 5,
-	//		MaxRecursion -> 6, WorkingPrecision -> 10]
-
 	return 0;
 }
 
