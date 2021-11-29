@@ -185,7 +185,7 @@ int main()
 
 void BasisSetFourTuple::HRR1() //(ab|cd) -> (a0|cd)
 {
-	deque<BasisSetFourTupleUnit> temp;
+	deque<BasisSetFourTupleUnit> temp_dd;
 	for (signed char i = 0; i < 3; i++)
 	{
 		while (!dd.empty())
@@ -193,254 +193,115 @@ void BasisSetFourTuple::HRR1() //(ab|cd) -> (a0|cd)
 			auto& front = dd.front();
 			if (front.b[i] == 0)
 			{
-				temp.push_back(front);
+				temp_dd.push_back(front);
 				dd.pop_front();
 			}
 			else
 			{
+				BasisSetFourTupleUnit temp = front;
+				++temp.a[i];
+				--temp.b[i];
+				dd.push_back(temp);
 
+				temp = front;
+				--temp.b[i];
+				temp.coeff *= A_B[i];
+				dd.push_back(temp);
 			}
 		}
+		temp_dd.swap(dd);
 	}
-	//for (int i = 0; i < 3; i++)
-	//{
-	//	auto iter = m.begin();
-	//	while (iter != m.end()) {
-	//		if (iter->first[3 + i] == 0)
-	//		{
-	//			++iter;
-	//		}
-	//		else
-	//		{
-	//			vector<signed char> first = iter->first;
-	//			vector<signed char> temp = iter->first;
-	//			double second = iter->second;
-	//			m.erase(iter);
-
-	//			temp[i] = first[i] + 1;
-	//			temp[3 + i] = first[3 + i] - 1;
-	//			if (m.find(temp) == m.end())
-	//			{
-	//				m[temp] = second * 1.0;
-	//			}
-	//			else
-	//			{
-	//				m[temp] += second * 1.0;
-	//			}
-
-	//			temp = first;
-	//			temp[i] = first[i];
-	//			temp[3 + i] = first[3 + i] - 1;
-	//			if (m.find(temp) == m.end())
-	//			{
-	//				m[temp] = second * A_B[i];
-	//			}
-	//			else
-	//			{
-	//				m[temp] += second * A_B[i];
-	//			}
-	//			iter = m.begin();
-	//		}
-	//	}
-	//}
+	for (auto& a : dd)
+	{
+		dd1.push_back(BasisSetFourTupleUnit1{ a.a,a.c,a.d,a.coeff });
+	}
 }
 void BasisSetFourTuple::HRR2() //(a0|cd) -> (a0|c0)
 {
-	for (int i = 0; i < 3; i++)
+	deque<BasisSetFourTupleUnit1> temp_dd;
+	for (signed char i = 0; i < 3; i++)
 	{
-		auto iter = m.begin();
-		while (iter != m.end()) {
-			if (iter->first[9 + i] == 0)
+		while (!dd1.empty())
+		{
+			auto& front = dd1.front();
+			if (front.d[i] == 0)
 			{
-				++iter;
+				temp_dd.push_back(front);
+				dd1.pop_front();
 			}
 			else
 			{
-				vector<signed char> first = iter->first;
-				vector<signed char> temp = iter->first;
-				double second = iter->second;
-				m.erase(iter);
+				BasisSetFourTupleUnit1 temp = front;
+				++temp.c[i];
+				--temp.d[i];
+				dd1.push_back(temp);
 
-				temp[6 + i] = first[6 + i] + 1;
-				temp[9 + i] = first[9 + i] - 1;
-				if (m.find(temp) == m.end())
-				{
-					m[temp] = second * 1.0;
-				}
-				else
-				{
-					m[temp] += second * 1.0;
-				}
-
-				temp = first;
-				temp[6 + i] = first[6 + i];
-				temp[9 + i] = first[9 + i] - 1;
-				if (m.find(temp) == m.end())
-				{
-					m[temp] = second * C_D[i];
-				}
-				else
-				{
-					m[temp] += second * C_D[i];
-				}
-				iter = m.begin();
+				temp = front;
+				--temp.d[i];
+				temp.coeff *= C_D[i];
+				dd1.push_back(temp);
 			}
 		}
+		temp_dd.swap(dd1);
+	}
+	for (auto& a : dd1)
+	{
+		dd2.push_back(BasisSetFourTupleUnit2{ a.a,a.c,a.coeff });
 	}
 }
 void BasisSetFourTuple::HRR3() //(a0|c0) -> (a0|00)
 {
-	for (int i = 0; i < 3; i++)
+	deque<BasisSetFourTupleUnit2> temp_dd;
+	for (signed char i = 0; i < 3; i++)
 	{
-		auto iter = m.begin();
-		while (iter != m.end()) {
-			if (iter->first[6 + i] == 0)
+		while (!dd2.empty())
+		{
+			auto& front = dd2.front();
+			if (front.c[i] == 0)
 			{
-				++iter;
+				temp_dd.push_back(front);
+				dd2.pop_front();
 			}
 			else
 			{
-				vector<signed char> first = iter->first;
-				vector<signed char> temp = iter->first;
-				double second = iter->second;
-				m.erase(iter);
+				BasisSetFourTupleUnit2 temp = front;
+				--temp.c[i];
+				temp.coeff *= RR[i];
+				dd2.push_back(temp);
 
-				temp[6 + i] = first[6 + i] - 1;
-				if (m.find(temp) == m.end())
+				if (front.a[i] != 0)
 				{
-					m[temp] = second * RR[i];
-				}
-				else
-				{
-					m[temp] += second * RR[i];
-				}
-
-				if (first[i] != 0)
-				{
-					temp = first;
-					temp[6 + i] = first[6 + i] - 1;
-					temp[i] = first[i] - 1;
-					if (m.find(temp) == m.end())
-					{
-						m[temp] = second * first[i] / two_eta;
-					}
-					else
-					{
-						m[temp] += second * first[i] / two_eta;
-					}
+					temp = front;
+					--temp.c[i];
+					--temp.a[i];
+					temp.coeff *= front.a[i] / two_eta;
+					dd2.push_back(temp);
 				}
 
-				if (first[6 + i] != 1)
+				if (front.c[i] != 1)
 				{
-					temp = first;
-					temp[6 + i] = first[6 + i] - 2;
-					if (m.find(temp) == m.end())
-					{
-						m[temp] = second * (first[6 + i] - 1) / two_eta;
-					}
-					else
-					{
-						m[temp] += second * (first[6 + i] - 1) / two_eta;
-					}
+					temp = front;
+					--(--temp.c[i]);
+					temp.coeff *= (front.c[i] - 1) / two_eta;
+					dd2.push_back(temp);
 				}
-
-				temp = first;
-				temp[6 + i] = first[6 + i] - 1;
-				temp[i] = first[i] + 1;
-				if (m.find(temp) == m.end())
-				{
-					m[temp] = second * neg_xi_div_eta;
-				}
-				else
-				{
-					m[temp] += second * neg_xi_div_eta;
-				}
-				iter = m.begin();
+				temp = front;
+				--temp.c[i];
+				++temp.a[i];
+				temp.coeff *= neg_rho_div_xi;
+				dd2.push_back(temp);
 			}
 		}
+		temp_dd.swap(dd1);
+	}
+	for (auto& a : dd1)
+	{
+		dd2.push_back(BasisSetFourTupleUnit2{ a.a,a.c,a.coeff });
 	}
 }
 void BasisSetFourTuple::VRR()//(a0|00) -> (00|00)
 {
-	vector<signed char> v1;
-	v1.resize(4); // a1 a2 a3 m
-	for (auto& a : m)
-	{
-		for (int i = 0; i < 3; i++)
-		{
-			v1[i] = a.first[i];
-		}
-		v1[3] = 0;
-		m1[v1] = a.second;
-	}
 
-	for (int i = 0; i < 3; i++)
-	{
-		auto iter = m1.begin();
-		while (iter != m1.end()) {
-			if (iter->first[i] == 0)
-			{
-				++iter;
-			}
-			else
-			{
-				vector<signed char> first = iter->first;
-				vector<signed char> temp = iter->first;
-				double second = iter->second;
-				m1.erase(iter);
-
-				temp[i] = first[i] - 1;
-				if (m1.find(temp) == m1.end())
-				{
-					m1[temp] = second * P_A[i];
-				}
-				else
-				{
-					m1[temp] += second * P_A[i];
-				}
-
-				temp = first;
-				temp[i] = first[i] - 1;
-				temp[3] = first[3] + 1;
-				if (m1.find(temp) == m1.end())
-				{
-					m1[temp] = second * P_Q[i];
-				}
-				else
-				{
-					m1[temp] += second * P_Q[i];
-				}
-
-
-				if (first[i] != 1)
-				{
-					temp = first;
-					temp[i] = first[i] - 2;
-					if (m1.find(temp) == m1.end())
-					{
-						m1[temp] = second * (first[i] - 1) / two_xi;
-					}
-					else
-					{
-						m1[temp] += second * (first[i] - 1) / two_xi;
-					}
-
-					temp = first;
-					temp[i] = first[i] - 2;
-					temp[3] = first[3] + 1;
-					if (m1.find(temp) == m1.end())
-					{
-						m1[temp] = second * (first[i] - 1) / two_xi * neg_rho_div_xi;
-					}
-					else
-					{
-						m1[temp] += second * (first[i] - 1) / two_xi * neg_rho_div_xi;
-					}
-				}
-				iter = m1.begin();
-			}
-		}
-	}
 }
 
 
