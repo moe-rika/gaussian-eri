@@ -1,6 +1,3 @@
-//Obara Daika shceme 
-//DOI: 10.1039/b605188j
-
 #include<vector>
 #include<map>
 #include<iostream>
