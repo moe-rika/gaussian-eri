@@ -1,5 +1,5 @@
 #include<vector>
-#include<map>
+#include<deque>
 #include<iostream>
 #include<array>
 #include<cmath>
@@ -7,28 +7,30 @@
 #include "Point3D.hpp"
 
 using std::vector;
-using std::map;
+using std::deque;
 using std::cout;
 using std::endl;
 using std::array;
+
+using AngularMomentum = array<signed char, 3>;
+
 
 const double PI = 3.141592653589793238463;
 
 class BasisSet
 {
 public:
-	signed char a[3];
+	AngularMomentum a;
 	double coeficient;
 	double alpha;
 	Point3D center;
 };
 
-class BasisSetFourToulpe
+class BasisSetFourTuple
 {
 public:
-	BasisSetFourToulpe(const BasisSet& a, const BasisSet& b, const BasisSet& c, const BasisSet& d) :
-		v{ a.a[0],a.a[1],a.a[2],b.a[0],b.a[1],b.a[2],c.a[0],c.a[1],c.a[2],d.a[0],d.a[1],d.a[2] },
-		c{ a.coeficient,b.coeficient,c.coeficient,d.coeficient }
+	BasisSetFourTuple(const BasisSet& a, const BasisSet& b, const BasisSet& c, const BasisSet& d) :
+		coeff{ a.coeficient,b.coeficient,c.coeficient,d.coeficient }
 	{
 		xi = a.alpha + b.alpha;
 		eta = c.alpha + d.alpha;
@@ -41,37 +43,78 @@ public:
 		B = b.center;
 		C = c.center;
 		D = d.center;
+		a_ = a.a;
+		b_ = b.a;
+		c_ = c.a;
+		d_ = d.a;
 		P = (alpha * A + beta * B) / xi;
 		Q = (gamma * C + delta * D) / eta;
 		T = rho * (P - Q).norm_sq();
 		Sab = exp(-alpha * beta / xi * (A - B).norm_sq());
 		Scd = exp(-gamma * delta / eta * (C - D).norm_sq());
+
+		A_B = A - B;
+		C_D = C - D;
+		RR = Q - C + xi / eta * (P - A);
+		two_eta = eta * 2;
+		neg_xi_div_eta = -xi / eta;
+		P_A = P - A;
+		P_Q = -rho / xi * (P - Q);
+		two_xi = 2 * xi;
+		neg_rho_div_xi = -rho / xi;
+		coef = pow(3.141592657 / (xi + eta), 1.5) * Sab * Scd;
+		dd.push_back(BasisSetFourTupleUnit{ a_, b_, c_, d_, 1 });
 	}
-	vector<signed char> v;
-	vector<double> c;
+
+
+	vector<double> coeff;
+	AngularMomentum a_, b_, c_, d_;
 	double alpha, beta, gamma, delta;
 	double xi, eta, rho, T, Sab, Scd;
 	Point3D A, B, C, D, P, Q;
-};
 
-class BasisSetFourToulpeRecursionInterace
-{
-public:
-	BasisSetFourToulpeRecursionInterace(const BasisSetFourToulpe& p)
+
+	double two_eta, neg_xi_div_eta, two_xi, neg_rho_div_xi;
+	Point3D A_B, C_D, RR, P_A, P_Q;
+	double coef;
+
+
+	struct BasisSetFourTupleUnit
 	{
-		m[p.v] = 1.0;
-		A_B = p.A - p.B;
-		C_D = p.C - p.D;
-		RR = p.Q - p.C + p.xi / p.eta * (p.P - p.A);
-		two_eta = p.eta * 2;
-		neg_xi_div_eta = -p.xi / p.eta;
-		P_A = p.P - p.A;
-		P_Q = -p.rho / p.xi * (p.P - p.Q);
-		two_xi = 2 * p.xi;
-		neg_rho_div_xi = -p.rho / p.xi;
-		coef = pow(3.141592657 / (p.xi + p.eta), 1.5) * p.Sab * p.Scd ;
-	}
+		AngularMomentum a, b, c, d;
+		double coeff;
+	};
 
+	struct BasisSetFourTupleUnit1
+	{
+		AngularMomentum a, c, d;
+		double coeff;
+	};
+
+	struct BasisSetFourTupleUnit2
+	{
+		AngularMomentum a, c;
+		double coeff;
+	};
+
+	struct BasisSetFourTupleUnit3
+	{
+		AngularMomentum a;
+		signed char m;
+		double coeff;
+	};
+
+	struct BasisSetFourTupleUnit4
+	{
+		signed char m;
+		double coeff;
+	};
+
+	deque<BasisSetFourTupleUnit> dd;
+	deque<BasisSetFourTupleUnit1> dd1;
+	deque<BasisSetFourTupleUnit2> dd2;
+	deque<BasisSetFourTupleUnit3> dd3;
+	deque<BasisSetFourTupleUnit4> dd4;
 
 
 
@@ -92,11 +135,7 @@ public:
 		}
 	}
 
-	map<vector<signed char>, double> m;
-	map<vector<signed char>, double> m1;
-	double two_eta, neg_xi_div_eta, two_xi, neg_rho_div_xi;
-	Point3D A_B, C_D, RR, P_A, P_Q;
-	double coef;
+
 };
 
 
@@ -107,8 +146,8 @@ int main()
 	BasisSet px2{ {1,0,0},1,0.23,{1,0,0} };
 	BasisSet px3{ {0,2,0},1,0.34,{0,0,0} };
 	BasisSet px4{ {0,2,0},1,0.45,{1,0,0} };
-	auto m0 = (BasisSetFourToulpe(px1, px2, px3, px4));
-	auto m = BasisSetFourToulpeRecursionInterace(m0);
+	auto m0 = (BasisSetFourTuple(px1, px2, px3, px4));
+	auto m = m0;
 	m.HRR1();
 	m.HRR2();
 	m.HRR3();
@@ -144,51 +183,68 @@ int main()
 }
 
 
-void BasisSetFourToulpeRecursionInterace::HRR1() //(ab|cd) -> (a0|cd)
+void BasisSetFourTuple::HRR1() //(ab|cd) -> (a0|cd)
 {
-	for (int i = 0; i < 3; i++)
+	deque<BasisSetFourTupleUnit> temp;
+	for (signed char i = 0; i < 3; i++)
 	{
-		auto iter = m.begin();
-		while (iter != m.end()) {
-			if (iter->first[3 + i] == 0)
+		while (!dd.empty())
+		{
+			auto& front = dd.front();
+			if (front.b[i] == 0)
 			{
-				++iter;
+				temp.push_back(front);
+				dd.pop_front();
 			}
 			else
 			{
-				vector<signed char> first = iter->first;
-				vector<signed char> temp = iter->first;
-				double second = iter->second;
-				m.erase(iter);
 
-				temp[i] = first[i] + 1;
-				temp[3 + i] = first[3 + i] - 1;
-				if (m.find(temp) == m.end())
-				{
-					m[temp] = second * 1.0;
-				}
-				else
-				{
-					m[temp] += second * 1.0;
-				}
-
-				temp = first;
-				temp[i] = first[i];
-				temp[3 + i] = first[3 + i] - 1;
-				if (m.find(temp) == m.end())
-				{
-					m[temp] = second * A_B[i];
-				}
-				else
-				{
-					m[temp] += second * A_B[i];
-				}
-				iter = m.begin();
 			}
 		}
 	}
+	//for (int i = 0; i < 3; i++)
+	//{
+	//	auto iter = m.begin();
+	//	while (iter != m.end()) {
+	//		if (iter->first[3 + i] == 0)
+	//		{
+	//			++iter;
+	//		}
+	//		else
+	//		{
+	//			vector<signed char> first = iter->first;
+	//			vector<signed char> temp = iter->first;
+	//			double second = iter->second;
+	//			m.erase(iter);
+
+	//			temp[i] = first[i] + 1;
+	//			temp[3 + i] = first[3 + i] - 1;
+	//			if (m.find(temp) == m.end())
+	//			{
+	//				m[temp] = second * 1.0;
+	//			}
+	//			else
+	//			{
+	//				m[temp] += second * 1.0;
+	//			}
+
+	//			temp = first;
+	//			temp[i] = first[i];
+	//			temp[3 + i] = first[3 + i] - 1;
+	//			if (m.find(temp) == m.end())
+	//			{
+	//				m[temp] = second * A_B[i];
+	//			}
+	//			else
+	//			{
+	//				m[temp] += second * A_B[i];
+	//			}
+	//			iter = m.begin();
+	//		}
+	//	}
+	//}
 }
-void BasisSetFourToulpeRecursionInterace::HRR2() //(a0|cd) -> (a0|c0)
+void BasisSetFourTuple::HRR2() //(a0|cd) -> (a0|c0)
 {
 	for (int i = 0; i < 3; i++)
 	{
@@ -232,7 +288,7 @@ void BasisSetFourToulpeRecursionInterace::HRR2() //(a0|cd) -> (a0|c0)
 		}
 	}
 }
-void BasisSetFourToulpeRecursionInterace::HRR3() //(a0|c0) -> (a0|00)
+void BasisSetFourTuple::HRR3() //(a0|c0) -> (a0|00)
 {
 	for (int i = 0; i < 3; i++)
 	{
@@ -304,7 +360,7 @@ void BasisSetFourToulpeRecursionInterace::HRR3() //(a0|c0) -> (a0|00)
 		}
 	}
 }
-void BasisSetFourToulpeRecursionInterace::VRR()//(a0|00) -> (00|00)
+void BasisSetFourTuple::VRR()//(a0|00) -> (00|00)
 {
 	vector<signed char> v1;
 	v1.resize(4); // a1 a2 a3 m
@@ -388,3 +444,19 @@ void BasisSetFourToulpeRecursionInterace::VRR()//(a0|00) -> (00|00)
 }
 
 
+//0 0 0 0  1.446
+//0 0 0 1 - 2.10049
+//0 0 0 2  0.885293
+//0 0 0 3 - 0.117013
+//0 0 0 4  0.000416695
+//0 0 0 5  0
+//0 0 0 6  0
+//234.811
+//0 0.999381 0.00185794 1.44511
+//1 0.332962 0.00185794 - 0.699382
+//2 0.199735 0.00185794 0.176824
+//3 0.142651 0.00185794 - 0.016692
+//4 0.110892 0.00185794 4.62082e-05
+//5 - 0.0308185 0.00185794 - 0
+//6 - 359.848 0.00185794 - 0
+//81.7487
